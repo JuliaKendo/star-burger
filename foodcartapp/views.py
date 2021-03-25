@@ -1,7 +1,9 @@
+import pdb
 from django.http import JsonResponse
 from django.templatetags.static import static
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 from .models import Product, Order, ProductsOrdered
 
@@ -58,7 +60,26 @@ def product_list_api(request):
     })
 
 
+def validate_json(handle_function):
+    def inner(request):
+        if not isinstance(request.data, dict):
+            return Response(
+                {'error': 'Отсутствует информация о заказе'}, headers={'Accept': 'json'}
+            )
+        elif not ('products' in request.data.keys() and request.data['products']):
+            return Response(
+                {'error': 'В заказе отсутствуют продукты'}, headers={'Accept': 'json'}
+            )
+        elif not isinstance(request.data['products'], list):
+            return Response(
+                {'error': 'Отсутствует информация о продуктах'}, headers={'Accept': 'json'}
+            )
+        handle_function(request)
+    return inner
+
+
 @api_view(['POST'])
+@validate_json
 def register_order(request):
     order = Order.objects.create(
         **{key: value for key, value in request.data.items() if key != 'products'}
@@ -69,4 +90,4 @@ def register_order(request):
             order=order, product=product, quantity=row_of_order['quantity']
         )
 
-    return JsonResponse({})
+    return Response({}, headers={'Accept': 'json'})
