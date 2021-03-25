@@ -1,7 +1,7 @@
-import pdb
 from django.http import JsonResponse
 from django.templatetags.static import static
 from django.shortcuts import get_object_or_404
+from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
@@ -64,17 +64,40 @@ def validate_json(handle_function):
     def inner(request):
         if not isinstance(request.data, dict):
             return Response(
-                {'error': 'Отсутствует информация о заказе'}, headers={'Accept': 'json'}
+                {'error': 'Отсутствует информация о заказе'},
+                status=status.HTTP_400_BAD_REQUEST
             )
-        elif not ('products' in request.data.keys() and request.data['products']):
+        elif not (request.data.get('firstname') and isinstance(request.data['firstname'], str)):
             return Response(
-                {'error': 'В заказе отсутствуют продукты'}, headers={'Accept': 'json'}
+                {'error': 'Не указано имя заказчика'},
+                status=status.HTTP_400_BAD_REQUEST
             )
-        elif not isinstance(request.data['products'], list):
+        elif not (request.data.get('lastname') and isinstance(request.data['lastname'], str)):
             return Response(
-                {'error': 'Отсутствует информация о продуктах'}, headers={'Accept': 'json'}
+                {'error': 'Не указана фамилия заказчика'},
+                status=status.HTTP_400_BAD_REQUEST
             )
-        handle_function(request)
+        elif not (request.data.get('address') and isinstance(request.data['address'], str)):
+            return Response(
+                {'error': 'Не указан адрес заказа'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        elif not (request.data.get('phonenumber') and isinstance(request.data['phonenumber'], str)):
+            return Response(
+                {'error': 'Не указан телефон заказчика'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        elif not (request.data.get('products') and isinstance(request.data['products'], list)):
+            return Response(
+                {'error': 'В заказе отсутствуют продукты'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        elif [True for item in request.data['products'] if not item['product'] in Product.objects.values_list('id', flat=True)]:
+            return Response(
+                {'error': 'Заказан отсутствующий продукт'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        return handle_function(request)
     return inner
 
 
