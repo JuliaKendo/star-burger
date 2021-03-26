@@ -15,11 +15,11 @@ class ProductsOrderedSerializer(ModelSerializer):
 
 
 class OrderSerializer(ModelSerializer):
-    products = ProductsOrderedSerializer(many=True)
+    products = ProductsOrderedSerializer(many=True, write_only=True)
 
     class Meta:
         model = Order
-        fields = ['address', 'firstname', 'lastname', 'phonenumber', 'products']
+        fields = '__all__'
 
 
 def banners_list_api(request):
@@ -86,5 +86,4 @@ def register_order(request):
     order_fields = serializer.validated_data['products']
     products = [ProductsOrdered(order=order, **fields) for fields in order_fields]
     ProductsOrdered.objects.bulk_create(products)
-
-    return Response({}, headers={'Accept': 'json'})
+    return Response(OrderSerializer(order).data)
