@@ -1,11 +1,25 @@
 from django.http import JsonResponse
 from django.templatetags.static import static
-from django.shortcuts import get_object_or_404
-from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework.serializers import ModelSerializer
 
 from .models import Product, Order, ProductsOrdered
+
+
+class ProductsOrderedSerializer(ModelSerializer):
+
+    class Meta:
+        model = ProductsOrdered
+        fields = ['product', 'quantity']
+
+
+class OrderSerializer(ModelSerializer):
+    products = ProductsOrderedSerializer(many=True)
+
+    class Meta:
+        model = Order
+        fields = ['address', 'firstname', 'lastname', 'phonenumber', 'products']
 
 
 def banners_list_api(request):
@@ -60,57 +74,17 @@ def product_list_api(request):
     })
 
 
-def validate_json(handle_function):
-    def inner(request):
-        if not isinstance(request.data, dict):
-            return Response(
-                {'error': 'Отсутствует информация о заказе'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        elif not (request.data.get('firstname') and isinstance(request.data['firstname'], str)):
-            return Response(
-                {'error': 'Не указано имя заказчика'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        elif not (request.data.get('lastname') and isinstance(request.data['lastname'], str)):
-            return Response(
-                {'error': 'Не указана фамилия заказчика'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        elif not (request.data.get('address') and isinstance(request.data['address'], str)):
-            return Response(
-                {'error': 'Не указан адрес заказа'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        elif not (request.data.get('phonenumber') and isinstance(request.data['phonenumber'], str)):
-            return Response(
-                {'error': 'Не указан телефон заказчика'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        elif not (request.data.get('products') and isinstance(request.data['products'], list)):
-            return Response(
-                {'error': 'В заказе отсутствуют продукты'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        elif [True for item in request.data['products'] if not item['product'] in Product.objects.values_list('id', flat=True)]:
-            return Response(
-                {'error': 'Заказан отсутствующий продукт'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        return handle_function(request)
-    return inner
-
-
 @api_view(['POST'])
-@validate_json
 def register_order(request):
+    serializer = OrderSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+
     order = Order.objects.create(
-        **{key: value for key, value in request.data.items() if key != 'products'}
+        **{key: value for key, value in serializer.validated_data.items() if key != 'products'}
     )
-    for row_of_order in request.data['products']:
-        product = get_object_or_404(Product, id=row_of_order['product'])
-        ProductsOrdered.objects.create(
-            order=order, product=product, quantity=row_of_order['quantity']
-        )
+
+    order_fields = serializer.validated_data['products']
+    products = [ProductsOrdered(order=order, **fields) for fields in order_fields]
+    ProductsOrdered.objects.bulk_create(products)
 
     return Response({}, headers={'Accept': 'json'})
