@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.http import JsonResponse
 from django.templatetags.static import static
 from rest_framework.decorators import api_view
@@ -15,7 +16,7 @@ class ProductsOrderedSerializer(ModelSerializer):
 
 
 class OrderSerializer(ModelSerializer):
-    products = ProductsOrderedSerializer(many=True, write_only=True)
+    products = ProductsOrderedSerializer(many=True, write_only=True, allow_empty=False)
 
     class Meta:
         model = Order
@@ -76,14 +77,18 @@ def product_list_api(request):
 
 @api_view(['POST'])
 def register_order(request):
+
+    def calc_cost(row_of_order):
+        product = row_of_order['product']
+        return product.price * Decimal(row_of_order['quantity'])
+
     serializer = OrderSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
 
     order = Order.objects.create(
         **{key: value for key, value in serializer.validated_data.items() if key != 'products'}
     )
-
     order_fields = serializer.validated_data['products']
-    products = [ProductsOrdered(order=order, **fields) for fields in order_fields]
+    products = [ProductsOrdered(order=order, cost=calc_cost(fields), **fields) for fields in order_fields]
     ProductsOrdered.objects.bulk_create(products)
     return Response(OrderSerializer(order).data)

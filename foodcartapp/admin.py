@@ -22,7 +22,7 @@ class RestaurantMenuItemInline(admin.TabularInline):
 class ProductsOrderedInLine(admin.TabularInline):
     model = ProductsOrdered
     extra = 0
-    fields = ('product', 'quantity')
+    fields = ('product', 'quantity', 'cost')
 
 
 @admin.register(Restaurant)
