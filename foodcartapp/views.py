@@ -1,4 +1,5 @@
 from decimal import Decimal
+from django.db import transaction
 from django.http import JsonResponse
 from django.templatetags.static import static
 from rest_framework.decorators import api_view
@@ -85,10 +86,16 @@ def register_order(request):
     serializer = OrderSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
 
-    order = Order.objects.create(
-        **{key: value for key, value in serializer.validated_data.items() if key != 'products'}
-    )
-    order_fields = serializer.validated_data['products']
-    products = [ProductsOrdered(order=order, cost=calc_cost(fields), **fields) for fields in order_fields]
-    ProductsOrdered.objects.bulk_create(products)
+    with transaction.atomic():
+        order = Order.objects.create(
+            **{key: value for key, value in serializer.validated_data.items() if key != 'products'}
+        )
+        order_fields = serializer.validated_data['products']
+        products = [
+            ProductsOrdered(
+                order=order, cost=calc_cost(fields), **fields
+            ) for fields in order_fields
+        ]
+        ProductsOrdered.objects.bulk_create(products)
+
     return Response(OrderSerializer(order).data)
