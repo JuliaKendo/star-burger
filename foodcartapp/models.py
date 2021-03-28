@@ -73,13 +73,19 @@ class RestaurantMenuItem(models.Model):
 class OrderQuerySet(models.QuerySet):
 
     def fetch_orders_with_price(self):
-        return ProductsOrdered.objects.order_by('order').values(
+        orders_with_price = ProductsOrdered.objects.order_by('order').values(
             'order',
             address=F('order__address'),
             firstname=F('order__firstname'),
             lastname=F('order__lastname'),
-            phonenumber=F('order__phonenumber')
+            phonenumber=F('order__phonenumber'),
+            status_order=F('order__status_order')
         ).annotate(cost=Sum('cost'))
+        for order_info in orders_with_price:
+            order_info['status'] = Order.objects.get(
+                id=order_info['order']
+            ).get_status_order_display()
+        return orders_with_price
 
 
 class Order(models.Model):
@@ -87,11 +93,19 @@ class Order(models.Model):
     firstname = models.CharField('имя', max_length=50)
     lastname = models.CharField('фамилия', max_length=50)
     phonenumber = PhoneNumberField('телефон заказчика')
+    status_order = models.CharField(
+        'статус обработки', max_length=10, default='raw', choices=(
+            ('raw', 'Необработанный'),
+            ('processed', 'Обработанный')
+        ))
 
     objects = OrderQuerySet.as_manager()
 
     def __str__(self):
         return f'{self.firstname} {self.lastname} {self.address}'
+
+    def __unicode__(self):
+        return f'{self.get_status_order_display()}'
 
     class Meta:
         ordering = ['id']
