@@ -81,12 +81,13 @@ class OrderQuerySet(models.QuerySet):
             lastname=F('order__lastname'),
             phonenumber=F('order__phonenumber'),
             status_order=F('order__status_order'),
+            pyment_type=F('order__payment_type'),
             comment=F('order__comment')
         ).annotate(cost=Sum('cost'))
         for order_info in orders_with_price:
-            order_info['status'] = Order.objects.get(
-                id=order_info['order']
-            ).get_status_order_display()
+            order = Order.objects.get(id=order_info['order'])
+            order_info['status'] = order.get_status_order_display()
+            order_info['payment'] = order.get_payment_type_display()
         return orders_with_price
 
 
@@ -100,6 +101,11 @@ class Order(models.Model):
         'статус обработки', max_length=10, default='raw', choices=(
             ('raw', 'Необработанный'),
             ('processed', 'Обработанный')
+        ))
+    payment_type = models.CharField(
+        'Форма оплаты', max_length=10, default='cash', choices=(
+            ('cash', 'Наличные, при получении'),
+            ('online', 'Предоплата онлайн')
         ))
     called_at = models.DateTimeField('Дата созвона', blank=True, null=True)
     delivered_at = models.DateTimeField('Дата доставки', blank=True, null=True)

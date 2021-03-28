@@ -125,7 +125,7 @@ class OrderAdmin(admin.ModelAdmin):
     readonly_fields = ('registred_at',)
     fields = (
         'registred_at',
-        'status_order',
+        ('status_order', 'payment_type'),
         ('firstname', 'lastname'),
         ('phonenumber', 'address'),
         ('called_at', 'delivered_at')
