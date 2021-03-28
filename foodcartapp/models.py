@@ -79,7 +79,8 @@ class OrderQuerySet(models.QuerySet):
             firstname=F('order__firstname'),
             lastname=F('order__lastname'),
             phonenumber=F('order__phonenumber'),
-            status_order=F('order__status_order')
+            status_order=F('order__status_order'),
+            comment=F('order__comment')
         ).annotate(cost=Sum('cost'))
         for order_info in orders_with_price:
             order_info['status'] = Order.objects.get(
@@ -98,14 +99,12 @@ class Order(models.Model):
             ('raw', 'Необработанный'),
             ('processed', 'Обработанный')
         ))
+    comment = models.TextField('комментарий', max_length=200, blank=True)
 
     objects = OrderQuerySet.as_manager()
 
     def __str__(self):
         return f'{self.firstname} {self.lastname} {self.address}'
-
-    def __unicode__(self):
-        return f'{self.get_status_order_display()}'
 
     class Meta:
         ordering = ['id']
