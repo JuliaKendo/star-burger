@@ -122,6 +122,14 @@ class ProductAdmin(admin.ModelAdmin):
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     inlines = [ProductsOrderedInLine]
+    readonly_fields = ('registred_at',)
+    fields = (
+        'registred_at',
+        'status_order',
+        ('firstname', 'lastname'),
+        ('phonenumber', 'address'),
+        ('called_at', 'delivered_at')
+    )
 
     def response_post_save_change(self, request, obj):
         if "next" in request.GET and url_has_allowed_host_and_scheme(
