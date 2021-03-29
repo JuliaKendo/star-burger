@@ -128,7 +128,8 @@ class OrderAdmin(admin.ModelAdmin):
         ('status_order', 'payment_type'),
         ('firstname', 'lastname'),
         ('phonenumber', 'address'),
-        ('called_at', 'delivered_at')
+        ('called_at', 'delivered_at'),
+        'restaurant'
     )
 
     def response_post_save_change(self, request, obj):

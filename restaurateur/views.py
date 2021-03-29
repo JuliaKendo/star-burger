@@ -1,3 +1,4 @@
+import pdb
 from django import forms
 from django.shortcuts import redirect, render
 from django.views import View
@@ -8,7 +9,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth import views as auth_views
 
 
-from foodcartapp.models import Product, Restaurant, Order
+from foodcartapp.models import Product, Restaurant, Order, ProductsOrdered
 
 
 class Login(forms.Form):
@@ -97,6 +98,11 @@ def view_restaurants(request):
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
+    orders = Order.objects.fetch_orders_with_price()
+    for order in orders:
+        order['restaurants'] = Order.objects.filter(
+            id=order['order_num']
+        ).fetch_restaurants()
     return render(request, template_name='order_items.html', context={
-        'order_items': Order.objects.fetch_orders_with_price(),
+        'order_items': orders,
     })
