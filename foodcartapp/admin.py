@@ -129,7 +129,8 @@ class OrderAdmin(admin.ModelAdmin):
         ('firstname', 'lastname'),
         ('phonenumber', 'address'),
         ('called_at', 'delivered_at'),
-        'restaurant'
+        'restaurant',
+        'comment'
     )
 
     def response_post_save_change(self, request, obj):

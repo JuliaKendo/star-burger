@@ -27,22 +27,24 @@
 
     {% for item in order_items %}
       <tr>
-        <td>{{ item.order_num }}</td>
+        <td>{{ item.order.id }}</td>
         <td>{{ item.status}}</td>
         <td>{{ item.payment}}</td>
-        <td>{{ item.cost.normalize }} руб.</td>
-        <td>{{ item.firstname }} {{ item.lastname }}</td>
-        <td>{{ item.phonenumber }}</td>
-        <td>{{ item.address }}</td>
-        <td>{{ item.comment }}</td>
+        <td>{{ item.order.orders__cost__sum.normalize }} руб.</td>
+        <td>{{ item.order.firstname }} {{ item.order.lastname }}</td>
+        <td>{{ item.order.phonenumber }}</td>
+        <td>{{ item.order.address }}</td>
+        <td>{{ item.order.comment }}</td>
         <td><details>
           <summary>Развернуть</summary>
+            <ul>
             {% for restauran in item.restaurants %}
-              <p>{{ restauran.restaurant__name }}</p>
+              <li>{{ restauran.name }} - {{ restauran.distance }} km.</li>
             {% endfor %}
+            </ul>
         </details></td>
         <td>
-          <a href="{% url 'admin:foodcartapp_order_change' item.order_num|urlencode %}?next={{ request.path|urlencode }}">ред.</a>
+          <a href="{% url 'admin:foodcartapp_order_change' item.order.id|urlencode %}?next={{ request.path|urlencode }}">ред.</a>
         </td>
       </tr>
     {% endfor %}

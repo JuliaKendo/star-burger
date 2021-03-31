@@ -1,15 +1,17 @@
-import pdb
 from django import forms
+from django.conf import settings
 from django.shortcuts import redirect, render
 from django.views import View
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import user_passes_test
-
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import views as auth_views
+from foodcartapp.models import Product, Restaurant, RestaurantMenuItem, Order, ProductsOrdered
+from collections import Counter
+from more_itertools import first
 
 
-from foodcartapp.models import Product, Restaurant, Order, ProductsOrdered
+from restaurateur.geo import fetch_coordinates, calculate_distance
 
 
 class Login(forms.Form):
@@ -96,13 +98,49 @@ def view_restaurants(request):
     })
 
 
+def allocate_restaurants_on_order(order, products, restaurants):
+    products_in_order = [item['product'] for item in products if item['order'] == order.id]
+    restaurants_by_order = Counter(
+        (
+            items['restaurant__name'], items['restaurant__address']
+        ) for items in restaurants if items['product'] in products_in_order
+    )
+    return list(
+        first(item) for item in restaurants_by_order.most_common(len(products_in_order))
+    )
+
+
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
     orders = Order.objects.fetch_orders_with_price()
+    products = ProductsOrdered.objects.filter(order__in=orders).values('order', 'product')
+    restaurants = RestaurantMenuItem.objects.filter(
+        availability=True, product__in=products.values('product')
+    ).values('restaurant__name', 'restaurant__address', 'product')
+    orders_info = []
     for order in orders:
-        order['restaurants'] = Order.objects.filter(
-            id=order['order_num']
-        ).fetch_restaurants()
+        order_info = {'restaurants': []}
+        order_info['order'] = order
+        order_info['status'] = order.get_status_order_display()
+        order_info['payment'] = order.get_payment_type_display()
+        coordinates_from = fetch_coordinates(settings.YANDEX_API_KEY, order.address)
+        for restaurant_info in allocate_restaurants_on_order(order, products, restaurants):
+            name, address = restaurant_info
+            coordinates_to = fetch_coordinates(
+                settings.YANDEX_API_KEY, address
+            )
+            order_info['restaurants'].append(
+                {
+                    'name': name,
+                    'distance': calculate_distance(
+                        coordinates_from, coordinates_to
+                    )
+                }
+            )
+        order_info['restaurants'] = sorted(
+            order_info['restaurants'], key=lambda x: x['distance']
+        )
+        orders_info.append(order_info)
     return render(request, template_name='order_items.html', context={
-        'order_items': orders,
+        'order_items': orders_info,
     })

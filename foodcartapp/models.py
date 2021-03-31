@@ -75,35 +75,7 @@ class RestaurantMenuItem(models.Model):
 class OrderQuerySet(models.QuerySet):
 
     def fetch_orders_with_price(self):
-        orders_with_price = ProductsOrdered.objects.order_by('order').values(
-            order_num=F('order'),
-            address=F('order__address'),
-            firstname=F('order__firstname'),
-            lastname=F('order__lastname'),
-            phonenumber=F('order__phonenumber'),
-            status_order=F('order__status_order'),
-            pyment_type=F('order__payment_type'),
-            comment=F('order__comment')
-        ).annotate(cost=Sum('cost'))
-        for order_info in orders_with_price:
-            order = Order.objects.get(id=order_info['order_num'])
-            order_info['status'] = order.get_status_order_display()
-            order_info['payment'] = order.get_payment_type_display()
-        return orders_with_price
-
-    def fetch_restaurants(self):
-        return RestaurantMenuItem.objects.filter(
-            availability=True,
-            product__in=ProductsOrdered.objects.filter(
-                order__in=self
-            ).values('product')
-        ).values('restaurant__name').annotate(
-            Count('product')
-        ).filter(
-            product__count__in=ProductsOrdered.objects.filter(
-                order__in=self
-            ).aggregate(Count('product')).values()
-        )
+        return self.annotate(Sum('orders__cost'))
 
 
 class Order(models.Model):
@@ -127,7 +99,7 @@ class Order(models.Model):
     comment = models.TextField('комментарий', max_length=200, blank=True)
     restaurant = models.ForeignKey(
         Restaurant, on_delete=models.CASCADE,
-        related_name='oders', verbose_name="ресторан"
+        related_name='orders', verbose_name="ресторан"
     )
 
     objects = OrderQuerySet.as_manager()
@@ -144,11 +116,11 @@ class Order(models.Model):
 class ProductsOrdered(models.Model):
     order = models.ForeignKey(
         Order, on_delete=models.CASCADE,
-        related_name='oders', verbose_name="заказ"
+        related_name='orders', verbose_name="заказ"
     )
     product = models.ForeignKey(
         Product, on_delete=models.CASCADE,
-        related_name='oder_items', verbose_name='продукт'
+        related_name='order_items', verbose_name='продукт'
     )
     quantity = models.PositiveIntegerField('количество')
     cost = models.DecimalField(
