@@ -9,3 +9,4 @@ django-phonenumber-field==5.0.0
 djangorestframework==3.12.2
 more-itertools==8.6.0
 geopy==1.21.0
+django-extensions==3.1.1

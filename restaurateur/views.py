@@ -101,15 +101,17 @@ def view_restaurants(request):
 
 
 def allocate_restaurants_on_order(order, products, restaurants):
-    products_in_order = [item['product'] for item in products if item['order'] == order.id]
+    products_in_order = [
+        item['product'] for item in products if item['order'] == order.id
+    ]
     restaurants_by_order = Counter(
         (
             items['restaurant__name'], items['restaurant__address']
         ) for items in restaurants if items['product'] in products_in_order
     )
-    return list(
+    return [
         first(item) for item in restaurants_by_order.most_common(len(products_in_order))
-    )
+    ]
 
 
 def get_locations(orders, restaurants):
@@ -125,7 +127,9 @@ def get_locations(orders, restaurants):
 
 def fetch_coordinates(address, coordinates):
     try:
-        found_coordinates = next(filter(lambda item: item['address'] == address, coordinates))
+        found_coordinates = next(
+            filter(lambda item: item['address'] == address, coordinates)
+        )
     except StopIteration:
         return 0, 0
     return found_coordinates['lng'], found_coordinates['lat']
@@ -134,7 +138,9 @@ def fetch_coordinates(address, coordinates):
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
     orders = Order.objects.fetch_orders_with_price()
-    products = ProductsOrdered.objects.filter(order__in=orders).values('order', 'product')
+    products = ProductsOrdered.objects.filter(
+        order__in=orders
+    ).values('order', 'product')
     restaurants = RestaurantMenuItem.objects.filter(
         availability=True, product__in=products.values('product')
     ).values('restaurant__name', 'restaurant__address', 'product')
