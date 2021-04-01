@@ -47,7 +47,8 @@ def fetch_address_decryption(apikey, longitude, latitude):
 
 
 def calculate_distance(coordinates_from, coordinates_to):
-    return round(distance.distance(coordinates_from, coordinates_to).km, 1)
+    if coordinates_from and coordinates_to:
+        return round(distance.distance(coordinates_from, coordinates_to).km, 1)
 
 
 def get_value(address_structure):

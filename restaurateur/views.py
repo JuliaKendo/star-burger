@@ -1,17 +1,19 @@
 from django import forms
-from django.conf import settings
 from django.shortcuts import redirect, render
 from django.views import View
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import views as auth_views
-from foodcartapp.models import Product, Restaurant, RestaurantMenuItem, Order, ProductsOrdered
 from collections import Counter
 from more_itertools import first
 
-
-from restaurateur.geo import fetch_coordinates, calculate_distance
+from restaurateur.geo import calculate_distance
+from foodcartapp.models import (
+    Product, Restaurant,
+    RestaurantMenuItem, Order,
+    ProductsOrdered
+)
 
 
 class Login(forms.Form):
@@ -110,6 +112,25 @@ def allocate_restaurants_on_order(order, products, restaurants):
     )
 
 
+def get_locations(orders, restaurants):
+    locations = []
+    if restaurants:
+        locations.extend(Restaurant.objects.filter(
+            name__in=restaurants.values('restaurant__name')
+        ).get_coordinates().values())
+    if orders:
+        locations.extend(orders.get_coordinates().values())
+    return locations
+
+
+def fetch_coordinates(address, coordinates):
+    try:
+        found_coordinates = next(filter(lambda item: item['address'] == address, coordinates))
+    except StopIteration:
+        return 0, 0
+    return found_coordinates['lng'], found_coordinates['lat']
+
+
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
     orders = Order.objects.fetch_orders_with_price()
@@ -117,23 +138,22 @@ def view_orders(request):
     restaurants = RestaurantMenuItem.objects.filter(
         availability=True, product__in=products.values('product')
     ).values('restaurant__name', 'restaurant__address', 'product')
+    locations = get_locations(orders, restaurants)
     orders_info = []
     for order in orders:
         order_info = {'restaurants': []}
         order_info['order'] = order
         order_info['status'] = order.get_status_order_display()
         order_info['payment'] = order.get_payment_type_display()
-        coordinates_from = fetch_coordinates(settings.YANDEX_API_KEY, order.address)
+        coordinates_from = fetch_coordinates(order.address, locations)
         for restaurant_info in allocate_restaurants_on_order(order, products, restaurants):
             name, address = restaurant_info
-            coordinates_to = fetch_coordinates(
-                settings.YANDEX_API_KEY, address
-            )
             order_info['restaurants'].append(
                 {
                     'name': name,
                     'distance': calculate_distance(
-                        coordinates_from, coordinates_to
+                        coordinates_from,
+                        fetch_coordinates(address, locations)
                     )
                 }
             )

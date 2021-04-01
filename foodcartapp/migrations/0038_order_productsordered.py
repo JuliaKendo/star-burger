@@ -31,8 +31,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('quantity', models.PositiveIntegerField(verbose_name='количество')),
-                ('order', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='oders', to='foodcartapp.Order', verbose_name='заказ')),
-                ('product', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='oder_items', to='foodcartapp.Product', verbose_name='продукт')),
+                ('order', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='orders', to='foodcartapp.Order', verbose_name='заказ')),
+                ('product', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='order_items', to='foodcartapp.Product', verbose_name='продукт')),
             ],
             options={
                 'verbose_name': 'элемент заказа',

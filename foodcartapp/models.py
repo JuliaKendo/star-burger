@@ -1,15 +1,22 @@
-import pdb
 from django.db import models
 from django.utils import timezone
 from django.core.validators import MinValueValidator
 from phonenumber_field.modelfields import PhoneNumberField
-from django.db.models import F, Sum, Count
+from django.db.models import Sum
+
+
+class RestaurantQuerySet(models.QuerySet):
+
+    def get_coordinates(self):
+        return CoordinatesAddresses.objects.filter(address__in=self.values('address'))
 
 
 class Restaurant(models.Model):
     name = models.CharField('название', max_length=50)
     address = models.CharField('адрес', max_length=100, blank=True)
     contact_phone = models.CharField('контактный телефон', max_length=50, blank=True)
+
+    objects = RestaurantQuerySet.as_manager()
 
     def __str__(self):
         return self.name
@@ -77,6 +84,9 @@ class OrderQuerySet(models.QuerySet):
     def fetch_orders_with_price(self):
         return self.annotate(Sum('orders__cost'))
 
+    def get_coordinates(self):
+        return CoordinatesAddresses.objects.filter(address__in=self.values('address'))
+
 
 class Order(models.Model):
     registred_at = models.DateTimeField('Дата создания', default=timezone.now)
@@ -99,7 +109,7 @@ class Order(models.Model):
     comment = models.TextField('комментарий', max_length=200, blank=True)
     restaurant = models.ForeignKey(
         Restaurant, on_delete=models.CASCADE,
-        related_name='orders', verbose_name="ресторан"
+        related_name='orders', verbose_name="ресторан", null=True
     )
 
     objects = OrderQuerySet.as_manager()
@@ -135,3 +145,24 @@ class ProductsOrdered(models.Model):
         ordering = ['id']
         verbose_name = 'элемент заказа'
         verbose_name_plural = 'элементы заказа'
+
+
+class CoordinatesAddresses(models.Model):
+    updated_at = models.DateTimeField(
+        'Дата обновления', default=timezone.now
+    )
+    address = models.CharField('адрес', max_length=100)
+    lng = models.FloatField(
+        verbose_name='Долгота', default=0.0, blank=True
+    )
+    lat = models.FloatField(
+        verbose_name='Широта', default=0.0, blank=True
+    )
+
+    def __str__(self):
+        return self.address
+
+    class Meta:
+        ordering = ['id']
+        verbose_name = 'Координаты адресов'
+        verbose_name_plural = 'Координаты адресов'
