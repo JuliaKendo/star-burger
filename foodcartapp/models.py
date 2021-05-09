@@ -164,12 +164,8 @@ class CoordinatesAddresses(models.Model):
         'Дата обновления', default=timezone.now
     )
     address = models.CharField('адрес', max_length=100)
-    lng = models.FloatField(
-        verbose_name='Долгота', default=0.0, blank=True
-    )
-    lat = models.FloatField(
-        verbose_name='Широта', default=0.0, blank=True
-    )
+    lng = models.FloatField(verbose_name='Долгота')
+    lat = models.FloatField(verbose_name='Широта')
 
     def __str__(self):
         return self.address
