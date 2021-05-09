@@ -6,7 +6,7 @@ from django.db.models import F, Sum, DecimalField
 
 
 def fill_prod_cost_in_orders(apps, shema_editor):
-    ProductsOrdered = apps.get_model('foodcartapp', 'ProductsOrdered')
+    ProductsOrdered = apps.get_model('foodcartapp', 'OrderItem')
     product_with_costs = ProductsOrdered.objects.annotate(
         new_cost=Sum(F('product__price') * F('quantity'), output_field=DecimalField())
     )
@@ -23,12 +23,12 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name='productsordered',
+            model_name='orderitem',
             name='cost',
             field=models.DecimalField(decimal_places=2, default=0, max_digits=8, validators=[django.core.validators.MinValueValidator(0)], verbose_name='стоимость'),
         ),
         migrations.AlterField(
-            model_name='productsordered',
+            model_name='orderitem',
             name='quantity',
             field=models.PositiveIntegerField(verbose_name='количество'),
         ),

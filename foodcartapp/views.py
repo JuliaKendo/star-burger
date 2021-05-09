@@ -9,21 +9,21 @@ from rest_framework.serializers import ModelSerializer
 
 from .models import (
     Product, Order,
-    ProductsOrdered, CoordinatesAddresses
+    OrderItem, CoordinatesAddresses
 )
 
 from restaurateur.geo import fetch_coordinates
 
 
-class ProductsOrderedSerializer(ModelSerializer):
+class OrderItemSerializer(ModelSerializer):
 
     class Meta:
-        model = ProductsOrdered
+        model = OrderItem
         fields = ['product', 'quantity']
 
 
 class OrderSerializer(ModelSerializer):
-    products = ProductsOrderedSerializer(
+    products = OrderItemSerializer(
         many=True, write_only=True, allow_empty=False
     )
 
@@ -101,11 +101,11 @@ def register_order(request):
 
         order_fields = serializer.validated_data['products']
         products = [
-            ProductsOrdered(
+            OrderItem(
                 order=order, cost=calc_cost(fields), **fields
             ) for fields in order_fields
         ]
-        ProductsOrdered.objects.bulk_create(products)
+        OrderItem.objects.bulk_create(products)
 
     address = serializer.validated_data['address']
     lng, lat = fetch_coordinates(

@@ -12,7 +12,7 @@ from .models import (
     Restaurant,
     RestaurantMenuItem,
     Order,
-    ProductsOrdered
+    OrderItem
 )
 
 
@@ -21,8 +21,8 @@ class RestaurantMenuItemInline(admin.TabularInline):
     extra = 0
 
 
-class ProductsOrderedInLine(admin.TabularInline):
-    model = ProductsOrdered
+class OrderItemInLine(admin.TabularInline):
+    model = OrderItem
     extra = 0
     fields = ('product', 'quantity', 'cost')
 
@@ -126,7 +126,7 @@ class ProductAdmin(admin.ModelAdmin):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    inlines = [ProductsOrderedInLine]
+    inlines = [OrderItemInLine]
     readonly_fields = ('registred_at',)
     fields = (
         'registred_at',
@@ -146,6 +146,6 @@ class OrderAdmin(admin.ModelAdmin):
         return super().response_post_save_change(request, obj)
 
 
-@admin.register(ProductsOrdered)
-class ProductsOrderedAdmin(admin.ModelAdmin):
+@admin.register(OrderItem)
+class OrderItemAdmin(admin.ModelAdmin):
     raw_id_fields = ['product']

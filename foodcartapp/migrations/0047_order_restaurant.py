@@ -20,11 +20,11 @@ def allocate_restaurants_on_order(order, products, restaurants):
 def fill_restorans_in_orders(apps, shema_editor):
     Order = apps.get_model('foodcartapp', 'Order')
     Restaurant = apps.get_model('foodcartapp', 'Restaurant')
-    ProductsOrdered = apps.get_model('foodcartapp', 'ProductsOrdered')
+    OrderItem = apps.get_model('foodcartapp', 'OrderItem')
     RestaurantMenuItem = apps.get_model('foodcartapp', 'RestaurantMenuItem')
 
     orders = Order.objects.all()
-    products = ProductsOrdered.objects.filter(order__in=orders).values('order', 'product')
+    products = OrderItem.objects.filter(order__in=orders).values('order', 'product')
     restaurants = RestaurantMenuItem.objects.filter(
         availability=True, product__in=products.values('product')
     ).values('id', 'product')

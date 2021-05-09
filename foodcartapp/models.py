@@ -122,7 +122,7 @@ class Order(models.Model):
         verbose_name_plural = 'заказы'
 
 
-class ProductsOrdered(models.Model):
+class OrderItem(models.Model):
     order = models.ForeignKey(
         Order, on_delete=models.CASCADE,
         related_name='order_products', verbose_name="заказ"

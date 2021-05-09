@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('foodcartapp', '0038_order_productsordered'),
+        ('foodcartapp', '0038_order_orderitem'),
     ]
 
     operations = [
@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
             options={'ordering': ['id'], 'verbose_name': 'заказ', 'verbose_name_plural': 'заказы'},
         ),
         migrations.AlterModelOptions(
-            name='productsordered',
+            name='orderitem',
             options={'ordering': ['id'], 'verbose_name': 'элемент заказа', 'verbose_name_plural': 'элементы заказа'},
         ),
     ]

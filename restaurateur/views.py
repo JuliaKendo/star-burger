@@ -12,8 +12,7 @@ from restaurateur.geo import calculate_distance
 from foodcartapp.models import (
     Product, Restaurant,
     RestaurantMenuItem, Order,
-    ProductsOrdered,
-    CoordinatesAddresses
+    OrderItem, CoordinatesAddresses
 )
 
 
@@ -145,11 +144,11 @@ def fetch_coordinates(address, coordinates):
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
     orders = Order.objects.fetch_orders_with_price()
-    products = ProductsOrdered.objects.filter(
+    orders_items = OrderItem.objects.filter(
         order__in=orders
     ).values('order', 'product')
     restaurants = RestaurantMenuItem.objects.filter(
-        availability=True, product__in=products.values('product')
+        availability=True, product__in=orders_items.values('product')
     ).values('restaurant__name', 'restaurant__address', 'product')
     locations = get_locations(orders, restaurants)
     orders_info = []
@@ -159,7 +158,7 @@ def view_orders(request):
         order_info['status'] = order.get_status_order_display()
         order_info['payment'] = order.get_payment_type_display()
         coordinates_from = fetch_coordinates(order.address, locations)
-        for restaurant_info in allocate_restaurants_on_order(order, products, restaurants):
+        for restaurant_info in allocate_restaurants_on_order(order, orders_items, restaurants):
             name, address = restaurant_info
             order_info['restaurants'].append(
                 {
