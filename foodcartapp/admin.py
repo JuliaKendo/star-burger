@@ -148,4 +148,4 @@ class OrderAdmin(admin.ModelAdmin):
 
 @admin.register(ProductsOrdered)
 class ProductsOrderedAdmin(admin.ModelAdmin):
-    autocomplete_fields = ['product']
+    raw_id_fields = ['product']
