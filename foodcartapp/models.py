@@ -5,18 +5,10 @@ from phonenumber_field.modelfields import PhoneNumberField
 from django.db.models import Sum
 
 
-class RestaurantQuerySet(models.QuerySet):
-
-    def get_coordinates(self):
-        return CoordinatesAddresses.objects.filter(address__in=self.values('address'))
-
-
 class Restaurant(models.Model):
     name = models.CharField('название', max_length=50)
     address = models.CharField('адрес', max_length=100, blank=True)
     contact_phone = models.CharField('контактный телефон', max_length=50, blank=True)
-
-    objects = RestaurantQuerySet.as_manager()
 
     def __str__(self):
         return self.name
@@ -92,11 +84,6 @@ class RestaurantMenuItem(models.Model):
 class OrderQuerySet(models.QuerySet):
 
     def fetch_orders_with_price(self):
-
-    def get_coordinates(self):
-        return CoordinatesAddresses.objects.filter(
-            address__in=self.values('address')
-        )
         return self.annotate(Sum('order_products__cost'))
 
 
@@ -159,6 +146,14 @@ class ProductsOrdered(models.Model):
         verbose_name_plural = 'элементы заказа'
 
 
+class CoordinatesAddressesQuerySet(models.QuerySet):
+
+    def get_coordinates(self, address):
+        return self.filter(
+            address__in=address
+        )
+
+
 class CoordinatesAddresses(models.Model):
     updated_at = models.DateTimeField(
         'Дата обновления', default=timezone.now
@@ -166,6 +161,8 @@ class CoordinatesAddresses(models.Model):
     address = models.CharField('адрес', max_length=100)
     lng = models.FloatField(verbose_name='Долгота')
     lat = models.FloatField(verbose_name='Широта')
+
+    objects = CoordinatesAddressesQuerySet.as_manager()
 
     def __str__(self):
         return self.address
