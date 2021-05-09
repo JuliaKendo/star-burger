@@ -92,12 +92,12 @@ class RestaurantMenuItem(models.Model):
 class OrderQuerySet(models.QuerySet):
 
     def fetch_orders_with_price(self):
-        return self.annotate(Sum('orders__cost'))
 
     def get_coordinates(self):
         return CoordinatesAddresses.objects.filter(
             address__in=self.values('address')
         )
+        return self.annotate(Sum('order_products__cost'))
 
 
 class Order(models.Model):
@@ -138,11 +138,11 @@ class Order(models.Model):
 class ProductsOrdered(models.Model):
     order = models.ForeignKey(
         Order, on_delete=models.CASCADE,
-        related_name='orders', verbose_name="заказ"
+        related_name='order_products', verbose_name="заказ"
     )
     product = models.ForeignKey(
         Product, on_delete=models.CASCADE,
-        related_name='order_items', verbose_name='продукт'
+        related_name='product_by_orders', verbose_name='продукт'
     )
     quantity = models.PositiveIntegerField('количество')
     cost = models.DecimalField(
