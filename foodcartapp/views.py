@@ -107,10 +107,11 @@ def register_order(request):
         ]
         ProductsOrdered.objects.bulk_create(products)
 
-        address = serializer.validated_data['address']
-        lng, lat = fetch_coordinates(
-            settings.YANDEX_API_KEY, address
-        )
+    address = serializer.validated_data['address']
+    lng, lat = fetch_coordinates(
+        settings.YANDEX_API_KEY, address
+    )
+    if lng and lat:
         CoordinatesAddresses.objects.get_or_create(
             address=address,
             lng=lng, lat=lat
