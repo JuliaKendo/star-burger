@@ -88,7 +88,9 @@ class OrderQuerySet(models.QuerySet):
 
 
 class Order(models.Model):
-    registred_at = models.DateTimeField('Дата создания', default=timezone.now)
+    registred_at = models.DateTimeField(
+        'Дата создания', default=timezone.now, db_index=True
+    )
     address = models.CharField('адрес', max_length=100)
     firstname = models.CharField('имя', max_length=50)
     lastname = models.CharField('фамилия', max_length=50)
@@ -97,14 +99,18 @@ class Order(models.Model):
         'статус обработки', max_length=10, default='raw', choices=(
             ('raw', 'Необработанный'),
             ('processed', 'Обработанный')
-        ))
+        ), db_index=True)
     payment_type = models.CharField(
         'Форма оплаты', max_length=10, default='cash', choices=(
             ('cash', 'Наличные, при получении'),
             ('online', 'Предоплата онлайн')
-        ))
-    called_at = models.DateTimeField('Дата созвона', blank=True, null=True)
-    delivered_at = models.DateTimeField('Дата доставки', blank=True, null=True)
+        ), db_index=True)
+    called_at = models.DateTimeField(
+        'Дата созвона', blank=True, null=True, db_index=True
+    )
+    delivered_at = models.DateTimeField(
+        'Дата доставки', blank=True, null=True, db_index=True
+    )
     comment = models.TextField('комментарий', max_length=200, blank=True)
     restaurant = models.ForeignKey(
         Restaurant, on_delete=models.SET_NULL,
@@ -156,9 +162,9 @@ class CoordinatesAddressesQuerySet(models.QuerySet):
 
 class CoordinatesAddresses(models.Model):
     updated_at = models.DateTimeField(
-        'Дата обновления', default=timezone.now
+        'Дата обновления', default=timezone.now, db_index=True
     )
-    address = models.CharField('адрес', max_length=100)
+    address = models.CharField('адрес', max_length=100, db_index=True)
     lng = models.FloatField(verbose_name='Долгота')
     lat = models.FloatField(verbose_name='Широта')
 
