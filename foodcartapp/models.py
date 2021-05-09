@@ -120,7 +120,7 @@ class Order(models.Model):
     delivered_at = models.DateTimeField('Дата доставки', blank=True, null=True)
     comment = models.TextField('комментарий', max_length=200, blank=True)
     restaurant = models.ForeignKey(
-        Restaurant, on_delete=models.CASCADE,
+        Restaurant, on_delete=models.SET_NULL,
         related_name='orders', verbose_name="ресторан", null=True
     )
 
