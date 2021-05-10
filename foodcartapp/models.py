@@ -164,7 +164,7 @@ class CoordinatesAddresses(models.Model):
     updated_at = models.DateTimeField(
         'Дата обновления', default=timezone.now, db_index=True
     )
-    address = models.CharField('адрес', max_length=100, db_index=True)
+    address = models.CharField('адрес', max_length=100, unique=True)
     lng = models.FloatField(verbose_name='Долгота')
     lat = models.FloatField(verbose_name='Широта')
 
