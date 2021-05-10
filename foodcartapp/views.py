@@ -8,10 +8,9 @@ from rest_framework.response import Response
 from rest_framework.serializers import ModelSerializer
 
 from .models import (
-    Product, Order,
-    OrderItem, CoordinatesAddresses
+    Product, Order, OrderItem
 )
-
+from addressclassifier.models import CoordinatesAddresses
 from restaurateur.geo import fetch_coordinates
 
 

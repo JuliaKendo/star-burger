@@ -11,9 +11,9 @@ from more_itertools import first
 from restaurateur.geo import calculate_distance
 from foodcartapp.models import (
     Product, Restaurant,
-    RestaurantMenuItem, Order,
-    OrderItem, CoordinatesAddresses
+    RestaurantMenuItem, Order, OrderItem
 )
+from addressclassifier.models import CoordinatesAddresses
 
 
 class Login(forms.Form):
