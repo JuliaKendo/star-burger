@@ -70,15 +70,15 @@ class RestaurantMenuItem(models.Model):
     )
     availability = models.BooleanField('в продаже', default=True, db_index=True)
 
-    def __str__(self):
-        return f"{self.restaurant.name} - {self.product.name}"
-
     class Meta:
         verbose_name = 'пункт меню ресторана'
         verbose_name_plural = 'пункты меню ресторана'
         unique_together = [
             ['restaurant', 'product']
         ]
+
+    def __str__(self):
+        return f"{self.restaurant.name} - {self.product.name}"
 
 
 class OrderQuerySet(models.QuerySet):
@@ -119,13 +119,13 @@ class Order(models.Model):
 
     objects = OrderQuerySet.as_manager()
 
-    def __str__(self):
-        return f'{self.firstname} {self.lastname} {self.address}'
-
     class Meta:
         ordering = ['id']
         verbose_name = 'заказ'
         verbose_name_plural = 'заказы'
+
+    def __str__(self):
+        return f'{self.firstname} {self.lastname} {self.address}'
 
 
 class OrderItem(models.Model):
@@ -143,10 +143,10 @@ class OrderItem(models.Model):
         default=0, validators=[MinValueValidator(0)]
     )
 
-    def __str__(self):
-        return f'{self.product} {self.order}'
-
     class Meta:
         ordering = ['id']
         verbose_name = 'элемент заказа'
         verbose_name_plural = 'элементы заказа'
+
+    def __str__(self):
+        return f'{self.product} {self.order}'

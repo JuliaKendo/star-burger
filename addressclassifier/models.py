@@ -20,10 +20,10 @@ class CoordinatesAddresses(models.Model):
 
     objects = CoordinatesAddressesQuerySet.as_manager()
 
-    def __str__(self):
-        return self.address
-
     class Meta:
         ordering = ['id']
         verbose_name = 'Координаты адресов'
         verbose_name_plural = 'Координаты адресов'
+
+    def __str__(self):
+        return self.address
