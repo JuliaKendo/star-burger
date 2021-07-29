@@ -114,23 +114,6 @@ def allocate_restaurants_on_order(order, products, restaurants):
     ]
 
 
-def get_locations(orders, restaurants):
-    locations = []
-    if restaurants:
-        locations.extend(
-            CoordinatesAddresses.objects.get_coordinates(
-                restaurants.values_list('restaurant__address')
-            ).values()
-        )
-    if orders:
-        locations.extend(
-            CoordinatesAddresses.objects.get_coordinates(
-                orders.values_list('address')
-            ).values()
-        )
-    return locations
-
-
 def fetch_coordinates(address, coordinates):
     try:
         found_coordinates = next(
@@ -150,7 +133,12 @@ def view_orders(request):
     restaurants = RestaurantMenuItem.objects.filter(
         availability=True, product__in=orders_items.values('product')
     ).values('restaurant__name', 'restaurant__address', 'product')
-    locations = get_locations(orders, restaurants)
+    locations = list(
+        CoordinatesAddresses.objects.get_coordinates([
+            *map(lambda item: item[0], restaurants.values_list('restaurant__address')),
+            *map(lambda item: item[0], orders.values_list('address'))
+        ]).values()
+    )
     orders_info = []
     for order in orders:
         order_info = {'restaurants': []}
