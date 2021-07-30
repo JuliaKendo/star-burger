@@ -17,7 +17,7 @@ def allocate_restaurants_on_order(order, products, restaurants):
     )
 
 
-def fill_restorans_in_orders(apps, shema_editor):
+def fill_restaurant_in_orders(apps, shema_editor):
     Order = apps.get_model('foodcartapp', 'Order')
     Restaurant = apps.get_model('foodcartapp', 'Restaurant')
     OrderItem = apps.get_model('foodcartapp', 'OrderItem')
@@ -49,5 +49,5 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='oders', to='foodcartapp.Restaurant', verbose_name='ресторан', null=True),
             preserve_default=False,
         ),
-        migrations.RunPython(fill_restorans_in_orders),
+        migrations.RunPython(fill_restaurant_in_orders),
     ]
