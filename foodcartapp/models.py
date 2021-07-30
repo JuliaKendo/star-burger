@@ -91,10 +91,10 @@ class Order(models.Model):
     registred_at = models.DateTimeField(
         'Дата создания', default=timezone.now, db_index=True
     )
-    address = models.CharField('адрес', max_length=100)
     firstname = models.CharField('имя', max_length=50)
     lastname = models.CharField('фамилия', max_length=50)
-    phonenumber = PhoneNumberField('телефон заказчика')
+    address = models.CharField('адрес', max_length=100, db_index=True)
+    phonenumber = PhoneNumberField('телефон заказчика', db_index=True)
     status_order = models.CharField(
         'статус обработки', max_length=10, default='raw', choices=(
             ('raw', 'Необработанный'),
