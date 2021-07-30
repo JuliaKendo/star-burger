@@ -135,7 +135,7 @@ class OrderItem(models.Model):
     )
     product = models.ForeignKey(
         Product, on_delete=models.CASCADE,
-        related_name='product_by_orders', verbose_name='продукт'
+        related_name='orders_items', verbose_name='продукт'
     )
     quantity = models.PositiveIntegerField('количество')
     cost = models.DecimalField(
