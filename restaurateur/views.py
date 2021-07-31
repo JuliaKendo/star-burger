@@ -147,8 +147,7 @@ def view_orders(request):
             'payment': order.get_payment_type_display(),
         }
         coordinates_from = fetch_coordinates(order.address, locations)
-        for restaurant_info in allocate_restaurants_on_order(order, orders_items, restaurants):
-            name, address = restaurant_info
+        for name, address in allocate_restaurants_on_order(order, orders_items, restaurants):
             order_info['restaurants'].append(
                 {
                     'name': name,
