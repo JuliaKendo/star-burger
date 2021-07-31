@@ -102,13 +102,12 @@ def register_order(request):
             **{key: value for key, value in serializer.validated_data.items() if key != 'products'}
         )
 
-        order_fields = serializer.validated_data['products']
-        products = [
+        ordered_products = serializer.validated_data['products']
+        OrderItem.objects.bulk_create([
             OrderItem(
                 order=order, cost=calc_cost(fields), **fields
-            ) for fields in order_fields
-        ]
-        OrderItem.objects.bulk_create(products)
+            ) for fields in ordered_products
+        ])
 
     address = serializer.validated_data['address']
     lng, lat = fetch_coordinates(
