@@ -5,18 +5,6 @@ from collections import Counter
 from more_itertools import first
 
 
-def allocate_restaurants_on_order(order, products, restaurants):
-    products_in_order = [item['product'] for item in products if item['order'] == order.id]
-    restaurants_by_order = Counter(
-        (
-            items['restaurant__id']
-        ) for items in restaurants if items['product'] in products_in_order
-    )
-    return list(
-        first(item) for item in restaurants_by_order.most_common(len(products_in_order))
-    )
-
-
 def fill_restaurant_in_orders(apps, shema_editor):
     Order = apps.get_model('foodcartapp', 'Order')
     Restaurant = apps.get_model('foodcartapp', 'Restaurant')
@@ -24,14 +12,22 @@ def fill_restaurant_in_orders(apps, shema_editor):
     RestaurantMenuItem = apps.get_model('foodcartapp', 'RestaurantMenuItem')
 
     orders = Order.objects.all()
-    products = OrderItem.objects.filter(order__in=orders).values('order', 'product')
-    restaurants = RestaurantMenuItem.objects.filter(
-        availability=True, product__in=products.values('product')
-    ).values('id', 'product')
-
     for order in orders:
-        restaurant = first(allocate_restaurants_on_order(order, products, restaurants))
-        order.restaurant = Restaurant.objects.get(id=restaurant['restaurant__id'])
+
+        count_ordered_products_in_restaurants = Counter(
+            items.restaurant.id for items in RestaurantMenuItem.objects.filter(
+                availability=True,
+                product__in=OrderItem.objects.filter(order=order).values('product')
+            )
+        )
+        most_suitable_restaurants = list(map(
+            lambda item: item[0], count_ordered_products_in_restaurants.most_common(1)
+        ))
+
+        if not most_suitable_restaurants:
+            continue
+
+        order.restaurant = Restaurant.objects.get(id=first(most_suitable_restaurants))
 
     Order.objects.bulk_update(orders, ['restaurant'])
 
@@ -46,7 +42,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='order',
             name='restaurant',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='oders', to='foodcartapp.Restaurant', verbose_name='ресторан', null=True),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='oders',
+                to='foodcartapp.Restaurant',
+                verbose_name='ресторан',
+                null=True
+            ),
             preserve_default=False,
         ),
         migrations.RunPython(fill_restaurant_in_orders),
