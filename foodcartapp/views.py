@@ -28,7 +28,11 @@ class OrderSerializer(ModelSerializer):
 
     class Meta:
         model = Order
-        fields = '__all__'
+        fields = [
+            'firstname', 'lastname',
+            'address', 'phonenumber',
+            'products',
+        ]
 
 
 def banners_list_api(request):
@@ -111,9 +115,12 @@ def register_order(request):
         settings.YANDEX_API_KEY, address
     )
     if lng and lat:
-        CoordinatesAddresses.objects.get_or_create(
+        CoordinatesAddresses.objects.update_or_create(
             address=address,
-            lng=lng, lat=lat
+            defaults={
+                'address': address,
+                'lng': lng, 'lat': lat
+            }
         )
 
     return Response(OrderSerializer(order).data)
