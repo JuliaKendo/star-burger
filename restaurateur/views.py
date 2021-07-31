@@ -141,10 +141,11 @@ def view_orders(request):
     )
     orders_info = []
     for order in orders:
-        order_info = {'restaurants': []}
-        order_info['order'] = order
-        order_info['status'] = order.get_status_order_display()
-        order_info['payment'] = order.get_payment_type_display()
+        order_info = {
+            'restaurants': [], 'order': order,
+            'status': order.get_status_order_display(),
+            'payment': order.get_payment_type_display(),
+        }
         coordinates_from = fetch_coordinates(order.address, locations)
         for restaurant_info in allocate_restaurants_on_order(order, orders_items, restaurants):
             name, address = restaurant_info
