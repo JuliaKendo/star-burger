@@ -114,7 +114,7 @@ def allocate_restaurants_on_order(order, products, restaurants):
     ]
 
 
-def fetch_coordinates(address, coordinates):
+def get_address_coordinates(address, coordinates):
     try:
         found_coordinates = next(
             filter(lambda item: item['address'] == address, coordinates)
@@ -146,15 +146,13 @@ def view_orders(request):
             'status': order.get_status_order_display(),
             'payment': order.get_payment_type_display(),
         }
-        coordinates_from = fetch_coordinates(order.address, locations)
+        coordinates_from = get_address_coordinates(order.address, locations)
         for name, address in allocate_restaurants_on_order(order, orders_items, restaurants):
+            coordinates_to = get_address_coordinates(address, locations)
             order_info['restaurants'].append(
                 {
                     'name': name,
-                    'distance': calculate_distance(
-                        coordinates_from,
-                        fetch_coordinates(address, locations)
-                    )
+                    'distance': calculate_distance(coordinates_from, coordinates_to)
                 }
             )
         order_info['restaurants'] = sorted(

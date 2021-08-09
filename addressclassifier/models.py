@@ -4,9 +4,9 @@ from django.utils import timezone
 
 class CoordinatesAddressesQuerySet(models.QuerySet):
 
-    def get_coordinates(self, address):
+    def get_coordinates(self, addresses):
         return self.filter(
-            address__in=address
+            address__in=addresses
         )
 
 
