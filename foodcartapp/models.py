@@ -101,7 +101,7 @@ class Order(models.Model):
             ('processed', 'Обработанный')
         ), db_index=True)
     payment_type = models.CharField(
-        'Форма оплаты', max_length=10, default='cash', choices=(
+        'Форма оплаты', max_length=10, null=True, choices=(
             ('cash', 'Наличные, при получении'),
             ('online', 'Предоплата онлайн')
         ), db_index=True)
