@@ -128,6 +128,17 @@ class ProductAdmin(admin.ModelAdmin):
 class OrderAdmin(admin.ModelAdmin):
     inlines = [OrderItemInLine]
     readonly_fields = ('registred_at',)
+    list_display = [
+        'id',
+        'registred_at',
+        'firstname',
+        'lastname',
+        'address',
+        'phonenumber',
+        'status_order',
+        'payment_type',
+        'comment'
+    ]
     fields = (
         'registred_at',
         ('status_order', 'payment_type'),
@@ -148,4 +159,7 @@ class OrderAdmin(admin.ModelAdmin):
 
 @admin.register(OrderItem)
 class OrderItemAdmin(admin.ModelAdmin):
+    list_display = [
+        'order', 'product', 'quantity', 'cost',
+    ]
     raw_id_fields = ['order', 'product']
