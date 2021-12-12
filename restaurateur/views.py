@@ -100,14 +100,14 @@ def view_restaurants(request):
     })
 
 
-def allocate_restaurants_on_order(order, products, restaurants):
+def allocate_restaurants_on_order(order, products, products_by_restaurants):
     products_in_order = [
         item['product'] for item in products if item['order'] == order.id
     ]
     restaurants_by_order = Counter(
         (
             items['restaurant__name'], items['restaurant__address']
-        ) for items in restaurants if items['product'] in products_in_order
+        ) for items in products_by_restaurants if items['product'] in products_in_order
     )
     return [
         first(item) for item in restaurants_by_order.most_common(len(products_in_order))
@@ -130,12 +130,12 @@ def view_orders(request):
     orders_items = OrderItem.objects.filter(
         order__in=orders
     ).values('order', 'product')
-    restaurants = RestaurantMenuItem.objects.filter(
+    products_by_restaurants = RestaurantMenuItem.objects.filter(
         availability=True, product__in=orders_items.values('product')
     ).values('restaurant__name', 'restaurant__address', 'product')
     locations = list(
         CoordinatesAddresses.objects.get_coordinates([
-            *map(lambda item: item[0], restaurants.values_list('restaurant__address')),
+            *map(lambda item: item[0], products_by_restaurants.values_list('restaurant__address')),
             *map(lambda item: item[0], orders.values_list('address'))
         ]).values()
     )
@@ -147,7 +147,7 @@ def view_orders(request):
             'payment': order.get_payment_type_display(),
         }
         coordinates_from = get_address_coordinates(order.address, locations)
-        for name, address in allocate_restaurants_on_order(order, orders_items, restaurants):
+        for name, address in allocate_restaurants_on_order(order, orders_items, products_by_restaurants):
             coordinates_to = get_address_coordinates(address, locations)
             order_info['restaurants'].append(
                 {
