@@ -14,6 +14,7 @@ from foodcartapp.models import (
     RestaurantMenuItem, Order, OrderItem
 )
 from addressclassifier.models import CoordinatesAddresses
+from addressclassifier.addressclassifier_lib import get_address_coordinates
 
 
 class Login(forms.Form):
@@ -112,15 +113,6 @@ def allocate_restaurants_on_order(order, products, products_by_restaurants):
     return [
         first(item) for item in restaurants_by_order.most_common(len(products_in_order))
     ]
-
-
-def get_address_coordinates(address, coordinates):
-    found_coordinates = first(
-        filter(lambda item: item['address'] == address, coordinates)
-    )
-    if found_coordinates:
-        return found_coordinates['lng'], found_coordinates['lat']
-    return 0, 0
 
 
 @user_passes_test(is_manager, login_url='restaurateur:login')

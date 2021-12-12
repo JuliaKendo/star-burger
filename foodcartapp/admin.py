@@ -14,6 +14,8 @@ from .models import (
     Order,
     OrderItem
 )
+from addressclassifier.models import CoordinatesAddresses
+from addressclassifier.addressclassifier_lib import save_address
 
 
 class RestaurantMenuItemInline(admin.TabularInline):
@@ -42,6 +44,11 @@ class RestaurantAdmin(admin.ModelAdmin):
     inlines = [
         RestaurantMenuItemInline
     ]
+
+    def response_post_save_change(self, request, obj):
+        if not CoordinatesAddresses.objects.get_coordinates([obj.address]).exists():
+            save_address(obj.address)
+        return super().response_post_save_change(request, obj)
 
 
 @admin.register(Product)
@@ -154,6 +161,8 @@ class OrderAdmin(admin.ModelAdmin):
             request.GET['next'], settings.ALLOWED_HOSTS
         ):
             return redirect(request.GET['next'])
+        if not CoordinatesAddresses.objects.get_coordinates([obj.address]).exists():
+            save_address(obj.address)
         return super().response_post_save_change(request, obj)
 
 

@@ -1,5 +1,4 @@
 from decimal import Decimal
-from django.conf import settings
 from django.db import transaction
 from django.http import JsonResponse
 from django.templatetags.static import static
@@ -10,8 +9,7 @@ from rest_framework.serializers import ModelSerializer
 from .models import (
     Product, Order, OrderItem
 )
-from addressclassifier.models import CoordinatesAddresses
-from restaurateur.geo import fetch_coordinates
+from addressclassifier.addressclassifier_lib import save_address
 
 
 class OrderItemSerializer(ModelSerializer):
@@ -110,16 +108,6 @@ def register_order(request):
         ])
 
     address = serializer.validated_data['address']
-    lng, lat = fetch_coordinates(
-        settings.YANDEX_API_KEY, address
-    )
-    if lng and lat:
-        CoordinatesAddresses.objects.update_or_create(
-            address=address,
-            defaults={
-                'address': address,
-                'lng': lng, 'lat': lat
-            }
-        )
+    save_address(address)
 
     return Response(OrderSerializer(order).data)
