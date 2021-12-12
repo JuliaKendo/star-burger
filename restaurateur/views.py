@@ -135,8 +135,10 @@ def view_orders(request):
     ).values('restaurant__name', 'restaurant__address', 'product')
 
     all_addresses = []
-    all_addresses.extend(products_by_restaurants.values_list('restaurant__address', flat=True))
-    all_addresses.extend(orders.values_list('address', flat=True))
+    all_addresses.extend(
+        products_by_restaurants.distinct().values_list('restaurant__address', flat=True)
+    )
+    all_addresses.extend(orders.distinct().values_list('address', flat=True))
     locations = list(
         CoordinatesAddresses.objects.get_coordinates(all_addresses).values()
     )
