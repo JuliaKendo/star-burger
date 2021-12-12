@@ -115,13 +115,12 @@ def allocate_restaurants_on_order(order, products, products_by_restaurants):
 
 
 def get_address_coordinates(address, coordinates):
-    try:
-        found_coordinates = next(
-            filter(lambda item: item['address'] == address, coordinates)
-        )
-    except (StopIteration, TypeError):
-        return 0, 0
-    return found_coordinates['lng'], found_coordinates['lat']
+    found_coordinates = first(
+        filter(lambda item: item['address'] == address, coordinates)
+    )
+    if found_coordinates:
+        return found_coordinates['lng'], found_coordinates['lat']
+    return 0, 0
 
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
