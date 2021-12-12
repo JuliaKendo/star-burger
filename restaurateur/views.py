@@ -146,7 +146,8 @@ def view_orders(request):
     orders_info = []
     for order in orders:
         order_info = {
-            'restaurants': [], 'order': order,
+            'order': order,
+            'restaurants': [],
             'status': order.get_status_order_display(),
             'payment': order.get_payment_type_display(),
         }
