@@ -133,12 +133,14 @@ def view_orders(request):
     products_by_restaurants = RestaurantMenuItem.objects.filter(
         availability=True, product__in=orders_items.values('product')
     ).values('restaurant__name', 'restaurant__address', 'product')
+
+    all_addresses = []
+    all_addresses.extend(products_by_restaurants.values_list('restaurant__address', flat=True))
+    all_addresses.extend(orders.values_list('address', flat=True))
     locations = list(
-        CoordinatesAddresses.objects.get_coordinates([
-            *map(lambda item: item[0], products_by_restaurants.values_list('restaurant__address')),
-            *map(lambda item: item[0], orders.values_list('address'))
-        ]).values()
+        CoordinatesAddresses.objects.get_coordinates(all_addresses).values()
     )
+
     orders_info = []
     for order in orders:
         order_info = {
