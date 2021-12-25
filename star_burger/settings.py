@@ -88,7 +88,11 @@ MEDIA_URL = '/media/'
 DATABASES = {
     'default': env.dj_db_url(
         'DATABASE_URL',
+<<<<<<< HEAD
         env.str('DATABASE_URL', ''),
+=======
+        env.str('DATABASE_URL', 'postgres://postgres:@127.0.0.1:5432/starburger'),
+>>>>>>> a73ece9c5c4beda74eabad7ee50dee384237d614
     )
 }
 
