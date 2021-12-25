@@ -140,6 +140,7 @@ parcel build bundles-src/index.js -d bundles --public-url="./"
 Настроить бэкенд: создать файл `.env` в каталоге `star_burger/` со следующими настройками:
 
 - `DEBUG` — дебаг-режим. Поставьте `False`.
+- `DATABASE_URL` - строка подключения к базе данных postgre в формате "postgres://USER:PASSWORD@HOST:PORT/DB_NAME"
 - `SECRET_KEY` — секретный ключ проекта. Он отвечает за шифрование на сайте. Например, им зашифрованы все пароли на вашем сайте. Не стоит использовать значение по-умолчанию, **замените на своё**.
 - `ALLOWED_HOSTS` — [см. документацию Django](https://docs.djangoproject.com/en/3.1/ref/settings/#allowed-hosts)
 - `YANDEX_API_KEY` — API ключ [yandex геокодер](https://developer.tech.yandex.ru/services), **замените на своё**.
