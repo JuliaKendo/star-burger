@@ -16,6 +16,7 @@ parcel build bundles-src/index.js -d bundles --public-url="./"> /dev/null
 yes "yes" | /usr/bin/python3 $work_folder/manage.py migrate> /dev/null
 
 systemctl restart starburger
+systemctl restart certbot-renewal
 systemctl reload nginx
 
 echo "deploy is finished"
