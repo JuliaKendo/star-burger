@@ -1,14 +1,8 @@
 #!/bin/bash
 
-if ! [ $(id -u) = 0 ]; then
-  echo "The script need to be run as root." >&2
-  exit 1
-fi
-
-user_name = $(logname)
 work_folder="/opt/star-burger"
 
-su $user_name -c "/usr/bin/git -C $work_folder pull --quiet"
+/usr/bin/git -C $work_folder pull --quiet
 
 yes | /usr/bin/pip3 install -r $work_folder/requirements.txt --quiet
 
