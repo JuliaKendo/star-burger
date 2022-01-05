@@ -137,6 +137,12 @@ Parcel будет следить за файлами в каталоге `bundle
 apt-get update
 ```
 
+Установить pip:
+
+```
+apt-get install python3-pip
+```
+
 Установить СУБД:
 
 ```
