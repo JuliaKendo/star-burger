@@ -190,19 +190,6 @@ server {
         alias /opt/star-burger/staticfiles/;
     }
 }
-
-server {
-    location / {
-        include '/etc/nginx/proxy_params';
-        proxy_pass http://127.0.0.1:8080/;
-    }
-    location /media/ {
-        alias /opt/star-burger/media/;
-    }
-    location /static/ {
-        alias /opt/star-burger/staticfiles/;
-    }
-}
 ```
 
 Установите сертификаты:
