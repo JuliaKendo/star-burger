@@ -4,6 +4,11 @@ work_folder="/opt/star-burger"
 
 /usr/bin/git -C $work_folder pull --quiet
 
+if [ $? -ne 0 ]; then
+  echo "deploy aborted"
+  exit
+fi
+
 yes | /usr/bin/pip3 install -r $work_folder/requirements.txt --quiet
 
 apt-get -qq -y install nodejs> /dev/null
