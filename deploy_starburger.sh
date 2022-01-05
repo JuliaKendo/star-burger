@@ -10,9 +10,12 @@ apt-get -qq -y install nodejs> /dev/null
 apt-get -qq -y  install npm> /dev/null
 
 npm install -g --silent parcel-bundler@1.12.3> /dev/null
+npx browserslist@latest --update-db> /dev/null
 parcel build bundles-src/index.js -d bundles --public-url="./"> /dev/null
 
-/usr/bin/python3 $work_folder/manage.py collectstatic --noinput> /dev/null
+if [ ! -d $work_folder/staticfiles ]; then mkdir $work_folder/staticfiles; fi
+yes "yes" | /usr/bin/python3 $work_folder/manage.py collectstatic> /dev/null
+yes "yes" | /usr/bin/python3 $work_folder/manage.py migrate foodcartapp> /dev/null
 yes "yes" | /usr/bin/python3 $work_folder/manage.py migrate> /dev/null
 
 systemctl restart starburger
