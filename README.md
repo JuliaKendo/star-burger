@@ -131,20 +131,111 @@ Parcel будет следить за файлами в каталоге `bundle
 
 ## Как запустить prod-версию сайта
 
-Собрать фронтенд:
+Обновите менеджер пакетов:
 
-```sh
-parcel build bundles-src/index.js -d bundles --public-url="./"
+```
+apt-get update
 ```
 
-Настроить бэкенд: создать файл `.env` в каталоге `star_burger/` со следующими настройками:
+Установить СУБД:
 
-- `DEBUG` — дебаг-режим. Поставьте `False`.
+```
+apt-get install postgresql
+```
+проверить, что СУБД успешно установлена и доступна для подключения:
+```
+pg_isready
+```
+
+Создать базу данных:
+
+```
+su - postgres
+psql
+ALTER USER postgres PASSWORD '';
+CREATE DATEBASE starburger;
+\q
+exit
+```
+
+Установите nginx для работы со статикой и media:
+
+```
+apt-get install nginx
+```
+
+Настройте nginx для работы со статикой и media:
+
+```
+nano /etc/nginx/sites-enabled/starburger
+```
+
+```
+server {
+    listen 80 default;
+    location / {
+        include '/etc/nginx/proxy_params';
+        proxy_pass http://127.0.0.1:8080/;
+    }
+    location /media/ {
+        alias /opt/star-burger/media/;
+    }
+    location /static/ {
+        alias /opt/star-burger/staticfiles/;
+    }
+}
+
+server {
+    location / {
+        include '/etc/nginx/proxy_params';
+        proxy_pass http://127.0.0.1:8080/;
+    }
+    location /media/ {
+        alias /opt/star-burger/media/;
+    }
+    location /static/ {
+        alias /opt/star-burger/staticfiles/;
+    }
+}
+```
+
+Установите сертификаты:
+
+```
+snap install core
+snap refresh core
+snap install --classic certbot
+ln -s /snap/bin/certbot /usr/bin/certbot
+certbot --nginx
+```
+
+Настройте виртуальное окружение:
+Создать файл `.env` в каталоге `star_burger/` со следующими настройками:
+
+- `DEBUG` — дебаг-режим. Используйте `True` для prod сервера, в остальных случаях `False`.
+- `DATABASE_URL` - строка подключения к базе данных, формата "postgres://user:password@127.0.0.1:5432/database"
 - `SECRET_KEY` — секретный ключ проекта. Он отвечает за шифрование на сайте. Например, им зашифрованы все пароли на вашем сайте. Не стоит использовать значение по-умолчанию, **замените на своё**.
 - `ALLOWED_HOSTS` — [см. документацию Django](https://docs.djangoproject.com/en/3.1/ref/settings/#allowed-hosts)
 - `YANDEX_API_KEY` — API ключ [yandex геокодер](https://developer.tech.yandex.ru/services), **замените на своё**.
 - `ROLLBAR_TOKEN` — Токен rollbar.
 - `ROLLBAR_ENVIRONMENT` — Определяет разработческая или прод. версия сайта. По умолчанию development.
+
+
+Настройте сервисы для автоматического исполнения:
+
+Скопируйте файлы *.service и *.timer в каталог `/etc/systemd/system`
+
+```
+systemctl enable *.service
+
+```
+
+Запустите скрипт деплоя:
+
+```
+./deploy_starburger.sh
+```
+
 
 ## Цели проекта
 
