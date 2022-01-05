@@ -173,6 +173,7 @@ apt-get install nginx
 Настройте nginx для работы со статикой и media:
 
 ```
+rm /etc/nginx/sites-enabled/default
 nano /etc/nginx/sites-enabled/starburger
 ```
 
