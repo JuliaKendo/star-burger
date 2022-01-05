@@ -16,7 +16,7 @@ apt-get -qq -y  install npm> /dev/null
 
 npm install -g --silent parcel-bundler@1.12.3> /dev/null
 npx browserslist@latest --update-db> /dev/null
-parcel build bundles-src/index.js -d bundles --public-url="./"> /dev/null
+parcel build bundles-src/index.js --no-minify -d bundles --public-url="./"> /dev/null
 
 if [ ! -d $work_folder/staticfiles ]; then mkdir $work_folder/staticfiles; fi
 yes "yes" | /usr/bin/python3 $work_folder/manage.py collectstatic> /dev/null
