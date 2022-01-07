@@ -230,6 +230,15 @@ systemctl enable *.service
 ./deploy_starburger.sh
 ```
 
+Координаты prod сервера, на котором расположен сайт:
+
+SITE | https://star-burger.site/
+--- | ---
+IP | 178.62.213.232
+USER | root
+PORT | 22
+DEPLOY SCRIPT | /opt/star-burger/deploy_starburger.sh
+
 
 ## Цели проекта
 
