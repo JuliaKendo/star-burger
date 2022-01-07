@@ -35,8 +35,9 @@ yes "yes" | /usr/bin/python3 $work_folder/manage.py migrate foodcartapp> /dev/nu
 yes "yes" | /usr/bin/python3 $work_folder/manage.py migrate> /dev/null
 
 systemctl restart starburger
-systemctl restart certbot-renewal
 systemctl reload nginx
+systemctl restart certbot-renewal.timer
+systemctl restart starburger-clearsessions.timer
 
 http --verify=no POST https://api.rollbar.com/api/1/deploy X-Rollbar-Access-Token:$rollbar_token \
   environment=$rollbar_env \
