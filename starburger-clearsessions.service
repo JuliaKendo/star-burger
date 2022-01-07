@@ -1,0 +1,12 @@
+[Unit]
+Description=Clear sessions django
+After=network.target
+
+[Service]
+User=root
+Group=root
+WorkingDirectory=/opt/star-burger/
+ExecStart=python3 manage.py clearsessions
+
+[Install]
+WantedBy=multi-user.target
