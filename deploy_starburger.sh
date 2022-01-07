@@ -1,10 +1,21 @@
 #!/bin/bash
 
 work_folder="/opt/star-burger"
+rollbar_token="218fcc9768274497bbb483d548e5b9d2"
+rollbar_env="production"
+
+apt-get -qq -y install httpie> /dev/null
 
 /usr/bin/git -C $work_folder pull --quiet
+commit_hash=$(git rev-parse --short HEAD)
 
 if [ $? -ne 0 ]; then
+  http --verify=no POST https://api.rollbar.com/api/1/deploy X-Rollbar-Access-Token:$rollbar_token \
+    environment=$rollbar_env \
+    revision=$commit_hash \
+    local_username=$(logname) \
+    status="failed"> /dev/null
+
   echo "deploy aborted"
   exit
 fi
@@ -26,5 +37,11 @@ yes "yes" | /usr/bin/python3 $work_folder/manage.py migrate> /dev/null
 systemctl restart starburger
 systemctl restart certbot-renewal
 systemctl reload nginx
+
+http --verify=no POST https://api.rollbar.com/api/1/deploy X-Rollbar-Access-Token:$rollbar_token \
+  environment=$rollbar_env \
+  revision=$commit_hash \
+  local_username=$(logname) \
+  status="succeeded"> /dev/null
 
 echo "deploy is finished"
