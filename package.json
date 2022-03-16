@@ -20,9 +20,12 @@
     "npm": "5.6.0"
   },
   "devDependencies": {
-    "core-js": "^3.6.5",
-    "@babel/core": "^7.10.2",
+    "@babel/core": "^7.16.7",
+    "@babel/plugin-proposal-class-properties": "^7.16.7",
     "@babel/preset-react": "^7.10.1",
+    "core-js": "^3.6.5",
+    "cssnano": "^5.0.14",
+    "postcss": "^8.4.5",
     "regenerator": "^0.14.4"
   }
 }
