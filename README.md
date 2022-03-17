@@ -34,10 +34,16 @@ python --version
 
 Возможно, вместо команды `python` здесь и в остальных инструкциях этого README придётся использовать `python3`. Зависит это от операционной системы и от того, установлен ли у вас Python старой второй версии.
 
+Установите virtualenv
+```sh
+apt install python3-virtualenv
+```
+
 В каталоге проекта создайте виртуальное окружение:
 ```sh
-python -m venv venv
+virtualenv venv
 ```
+
 Активируйте его. На разных операционных системах это делается разными командами:
 - Windows: `.\venv\Scripts\activate`
 - MacOS/Linux: `source venv/bin/activate`
@@ -143,6 +149,11 @@ apt-get update
 apt-get install python3-pip
 ```
 
+Установить virtualenv
+```sh
+apt install python3-virtualenv
+```
+
 Установить СУБД:
 
 ```
@@ -222,6 +233,11 @@ certbot --nginx
 ```
 systemctl enable *.service
 
+```
+
+В каталоге проекта создайте виртуальное окружение:
+```sh
+virtualenv venv
 ```
 
 Запустите скрипт деплоя:
