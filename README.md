@@ -204,6 +204,13 @@ server {
 }
 ```
 
+Установите nodejs и npm:
+```
+apt-get install nodejs
+apt-get install npm
+```
+
+
 Установите сертификаты:
 
 ```

@@ -10,7 +10,7 @@ source $work_folder/venv/bin/activate
 
 apt-get -qq -y install httpie> /dev/null
 
-/usr/bin/git -C $work_folder pull --quiet
+git -C $work_folder pull --quiet
 commit_hash=$(git rev-parse --short HEAD)
 
 http --verify=no POST https://api.rollbar.com/api/1/deploy X-Rollbar-Access-Token:$rollbar_token \
@@ -19,25 +19,16 @@ http --verify=no POST https://api.rollbar.com/api/1/deploy X-Rollbar-Access-Toke
   local_username=$(logname) \
   status="failed"> /dev/null
 
-yes | pip install -r $work_folder/requirements.txt --quiet
+pip install -r $work_folder/requirements.txt --quiet
 
-apt-get -qq -y install nodejs> /dev/null
-apt-get -qq -y  install npm> /dev/null
-
-npm install -g --silent parcel-bundler@1.12.3> /dev/null
+npm install -g --silent package.json parcel-bundler@1.12.3> /dev/null
 npx browserslist@latest --update-db> /dev/null
 parcel build bundles-src/index.js --no-minify -d bundles --public-url="./"> /dev/null
 
 if [ ! -d $work_folder/staticfiles ]; then mkdir $work_folder/staticfiles; fi
-
-if [ $? -ne 0 ]; then
-  yes "yes" | python $work_folder/manage.py collectstatic> /dev/null
-  yes "yes" | python $work_folder/manage.py migrate foodcartapp> /dev/null
-  yes "yes" | python $work_folder/manage.py migrate> /dev/null
-
-  echo "deploy aborted"
-  exit
-fi
+python $work_folder/manage.py collectstatic --noinput -v 0
+python $work_folder/manage.py migrate foodcartapp --noinput -v 0
+python $work_folder/manage.py migrate --noinput -v 0
 
 systemctl reload nginx
 systemctl restart starburger certbot-renewal.timer starburger-clearsessions.timer
